@@ -137,12 +137,49 @@ function createVCN(compartmentId, displayName, cidrBlock, callback) {
     request.end(body);
 };
 
+// Get information about the instance
+function getInstance(instanceId, callback){
+    
+    
+    var options = {
+        host: coreServicesDomain,
+        path: `/20160918/${instanceId}` ,
+        method: 'GET',
+        headers: {
+            "Content-Type": "application/json",
+        }
+    };
+
+    var request = https.request(options, handleRequest(callback));
+
+    sign(request, {
+        privateKey: privateKey,
+        keyFingerprint: keyFingerprint,
+        tenancyId: tenancyId,
+        userId: authUserId
+    });
+
+    request.end();
+}
+
 // Create and launch an instance 
 function createInstance(compartmentId, displayName, callback) {
     
     var body = JSON.stringify({
+        //Hard coded AD
+        availabilityDomain: "WSQk:US-ASHBURN-AD-3",
         compartmentId: compartmentId,
         displayName: displayName,
+        createVnicDetails: {
+            assignPublicIp: true,
+            subnetId: "ocid1.subnet.oc1.iad.aaaaaaaa7yvjiryympifoxuscb3asxegoiotc2c5vl52srg2yzohc4xrvuba"
+        } ,
+        sourceDetails: {
+            sourceType: "image",
+            bootVolumeSizeInGBs: 50,
+            imageId: "ocid1.image.oc1.iad.aaaaaaaafswkvu4a4fbkf3jnxsidjpdur244uwzn42mx47vdbs4vkp344yia"
+        } ,
+        shape: "VM.Standard2.1"
     });
 
     var options = {
@@ -168,8 +205,8 @@ function createInstance(compartmentId, displayName, callback) {
 };
 
 // test the above functions
-console.log("GET USER:");
-
+//console.log("GET USER:");
+/*
 getUser(authUserId, function(data) {
     console.log(data);
         
@@ -182,3 +219,18 @@ getUser(authUserId, function(data) {
         console.log(data);
     });
 });
+*/
+
+/*
+createInstance(ravelloCompartment, "TestInstance", function(data){
+    console.log(data);
+});
+*/
+
+//Get instance info
+getInstance("ocid1.instance.oc1.iad.abuwcljs5xuj63765ixzt2kogopar2uuhejtaooqp2p3eqdnjhsbax3manga", function(data) {
+    console.log(data);
+});
+
+
+//Ubuntu image OCID: ocid1.image.oc1.iad.aaaaaaaafswkvu4a4fbkf3jnxsidjpdur244uwzn42mx47vdbs4vkp344yia
