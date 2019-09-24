@@ -140,11 +140,61 @@ function createVCN(compartmentId, displayName, cidrBlock, callback) {
 // Get information about the instance
 function getInstance(instanceId, callback){
     
+    var options = {
+        host: coreServicesDomain,
+        path: '/20160918/instances/' + encodeURIComponent(instanceId) ,
+        method: 'GET'
+    };
+
+    var request = https.request(options, handleRequest(callback));
+
+    sign(request, {
+        privateKey: privateKey,
+        keyFingerprint: keyFingerprint,
+        tenancyId: tenancyId,
+        userId: authUserId
+    });
+
+    request.end();
+};
+
+//Stop the specified instance
+//TODO: get it working
+function stopInstance(instanceId, callback){
+    
+    
+    var body = JSON.stringify({
+        action: "SOFTSTOP"
+    });
+
+    var options = {
+        host: coreServicesDomain,
+        path: '/20160918/instances/' + encodeURIComponent(instanceId) ,
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+        }
+    };
+
+    var request = https.request(options, handleRequest(callback));
+
+    sign(request, {
+        body: body,
+        privateKey: privateKey,
+        keyFingerprint: keyFingerprint,
+        tenancyId: tenancyId,
+        userId: authUserId
+    });
+
+    request.end();
+};
+
+function deleteInstance(instanceId, callback){
     
     var options = {
         host: coreServicesDomain,
-        path: `/20160918/${instanceId}` ,
-        method: 'GET',
+        path: '/20160918/instances/' + encodeURIComponent(instanceId) ,
+        method: 'DELETE',
         headers: {
             "Content-Type": "application/json",
         }
@@ -160,7 +210,7 @@ function getInstance(instanceId, callback){
     });
 
     request.end();
-}
+};
 
 // Create and launch an instance 
 function createInstance(compartmentId, displayName, callback) {
@@ -204,6 +254,36 @@ function createInstance(compartmentId, displayName, callback) {
     request.end(body);
 };
 
+// Create a compartment
+function createCompartmnet(compartmentId, displayName, callback) {
+    
+    var body = JSON.stringify({
+        compartmentId: compartmentId,
+        displayName: displayName,
+    });
+
+    var options = {
+        host: identityDomain,
+        path: '/20160918/compartments/',
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+        }
+    };
+
+    var request = https.request(options, handleRequest(callback));
+
+    sign(request, {
+        body: body,
+        privateKey: privateKey,
+        keyFingerprint: keyFingerprint,
+        tenancyId: tenancyId,
+        userId: authUserId
+    });
+
+    request.end(body);
+};
+
 // test the above functions
 //console.log("GET USER:");
 /*
@@ -228,7 +308,7 @@ createInstance(ravelloCompartment, "TestInstance", function(data){
 */
 
 //Get instance info
-getInstance("ocid1.instance.oc1.iad.abuwcljs5xuj63765ixzt2kogopar2uuhejtaooqp2p3eqdnjhsbax3manga", function(data) {
+createInstance(ravelloCompartment, "inst2", function(data) {
     console.log(data);
 });
 
